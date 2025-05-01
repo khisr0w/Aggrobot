@@ -18,42 +18,33 @@ import rts.units.UnitType;
 import rts.units.UnitTypeTable;
 
 public class Aggrobot extends AbstractionLayerAI{
-
-
-    public class Vector2D
-    {
+    public class Vector2D {
         public float x;
         public float y;
 
         public Vector2D() { x = 0.f; y = 0.f; }
         public Vector2D(int x, int y) { this.x = x; this.y = y; }
     }
-    public class UnitDesc
-    {
+    public class UnitDesc {
         Unit unit = null;
         Vector2D distVec = null;
 
-        public UnitDesc()
-        {
+        public UnitDesc() {
             distVec = new Vector2D();
         }
     }
 
-    public UnitDesc getUniClosestEnemy(Unit leader, PhysicalGameState physicalGS, Player player)
-    {
+    public UnitDesc getUniClosestEnemy(Unit leader, PhysicalGameState physicalGS, Player player) {
         UnitDesc unitDesc = new UnitDesc();
 
-        for(Unit unit : physicalGS.getUnits())
-        {
-            if(unit.getPlayer() >= 0 && unit.getPlayer() != player.getID())
-            {
+        for(Unit unit : physicalGS.getUnits()) {
+            if(unit.getPlayer() >= 0 && unit.getPlayer() != player.getID()) {
                 int unitDistX = Math.abs(leader.getX() - unit.getX());
                 int unitDistY = Math.abs(leader.getY() - unit.getY());
 
                 int dist = unitDistX + unitDistY;
 
-                if(unitDesc.unit == null || dist < (unitDesc.distVec.x + unitDesc.distVec.y))
-                {
+                if(unitDesc.unit == null || dist < (unitDesc.distVec.x + unitDesc.distVec.y)) {
                     unitDesc.distVec.x = unitDistX;
                     unitDesc.distVec.y = unitDistY;
                     unitDesc.unit = unit;
@@ -63,8 +54,8 @@ public class Aggrobot extends AbstractionLayerAI{
 
         return unitDesc;
     }
-    public class Cluster
-    {
+
+    public class Cluster {
         GameState gs;
         List<Unit> units = null;
         // TODO(Abid): Make directional movement
@@ -76,14 +67,12 @@ public class Aggrobot extends AbstractionLayerAI{
         int posX = 0;
         int posY = 0;
 
-        public Cluster()
-        {
+        public Cluster() {
             units = new ArrayList<>();
         }
 
         public void moveC(GameState gs, int x, int y) {
-            for (Unit unit : units)
-            {
+            for (Unit unit : units) {
                 if(gs.getActionAssignment(unit) == null) { moveToVicinity(gs, unit, x, y); }
             }
             action = "move";
@@ -103,12 +92,10 @@ public class Aggrobot extends AbstractionLayerAI{
         //     return false;
         // }
 
-        public Vector2D getCentroid()
-        {
+        public Vector2D getCentroid() {
             Vector2D centroid = new Vector2D();
             
-            for (Unit unit : units)
-            {
+            for (Unit unit : units) {
                 centroid.x = centroid.x + unit.getX();
                 centroid.y = centroid.y + unit.getY();
             }
@@ -118,9 +105,9 @@ public class Aggrobot extends AbstractionLayerAI{
 
             return centroid;
         }
+
         public void moveCIfNotVicinity(GameState gs, int x, int y) {
-            for (Unit unit : units)
-            {
+            for (Unit unit : units) {
                 if(gs.getActionAssignment(unit) == null) { moveToVicinity(gs, unit, x, y); }
             }
             action = "move";
@@ -129,10 +116,8 @@ public class Aggrobot extends AbstractionLayerAI{
         }
 
         public void trainC(GameState gs, UnitType unit_type) {
-            for (Unit unit : units)
-            {
-                if(gs.getActionAssignment(unit) == null)
-                {
+            for (Unit unit : units) {
+                if(gs.getActionAssignment(unit) == null) {
                     train(unit, unit_type);
                 }
             }
@@ -141,10 +126,8 @@ public class Aggrobot extends AbstractionLayerAI{
         }
 
         public void buildC(GameState gs, UnitType unit_type, int x, int y) {
-            for (Unit unit : units)
-            {
-                if(gs.getActionAssignment(unit) == null)
-                {
+            for (Unit unit : units) {
+                if(gs.getActionAssignment(unit) == null) {
                     // Find the closest spot
                     build(unit, unit_type, x, y);
                 }
@@ -156,10 +139,8 @@ public class Aggrobot extends AbstractionLayerAI{
         }
 
         public void harvestC(GameState gs, Unit target, Unit base) {
-            for (Unit unit : units)
-            {
-                if(gs.getActionAssignment(unit) == null)
-                {
+            for (Unit unit : units) {
+                if(gs.getActionAssignment(unit) == null) {
                     harvest(unit, target, base);
                 }
             }
@@ -169,10 +150,8 @@ public class Aggrobot extends AbstractionLayerAI{
         }
 
         public void attackC(GameState gs, Unit target) {
-            for (Unit unit : units)
-            {
-                if(gs.getActionAssignment(unit) == null)
-                {
+            for (Unit unit : units) {
+                if(gs.getActionAssignment(unit) == null) {
                     attack(unit, target);
                 }
             }
@@ -181,23 +160,19 @@ public class Aggrobot extends AbstractionLayerAI{
         }
 
         public void idleC(GameState gs) {
-            for (Unit unit : units)
-            {
-                if(gs.getActionAssignment(unit) == null)
-                {
+            for (Unit unit : units) {
+                if(gs.getActionAssignment(unit) == null) {
                     idle(unit);
                 }
             }
             action = "idle";
         }
 
-        protected void moveToVicinity(GameState gs, Unit unit, int x, int y)
-        {
+        protected void moveToVicinity(GameState gs, Unit unit, int x, int y) {
             assert(gs.getActionAssignment(unit) == null);
             boolean[][] isGridFree = gs.getAllFree();
 
-            if(isGridFree[x][y])
-            {
+            if(isGridFree[x][y]) {
                 move(unit, x, y);
                 return;
             }
@@ -212,17 +187,14 @@ public class Aggrobot extends AbstractionLayerAI{
 
             int xAlternate = 1;
             int yAlternate = 1;
-            for (int xStride = 1; xStride < xAllowed; xStride++)
-            {
-                for (int yStride = 1; yStride < yAllowed; yStride++)
-                {
+            for (int xStride = 1; xStride < xAllowed; xStride++) {
+                for (int yStride = 1; yStride < yAllowed; yStride++) {
                     int potentialX = x + xStride*xAlternate;
                     int potentialY = y + yStride*yAlternate;
                     if(potentialX >= gs.getPhysicalGameState().getWidth() || potentialX < 0) { continue; }
                     if(potentialY >= gs.getPhysicalGameState().getHeight() || potentialY < 0) { continue; }
 
-                    if (isGridFree[potentialX][potentialY])
-                    {
+                    if (isGridFree[potentialX][potentialY]) {
                         move(unit, potentialX, potentialY);
                         return;
                     }
@@ -232,8 +204,7 @@ public class Aggrobot extends AbstractionLayerAI{
             }
         }
 
-        protected void buildInVicinity(GameState gs, Player p, UnitType unitType)
-        {
+        protected void buildInVicinity(GameState gs, Player p, UnitType unitType) {
             if(this.size() == 0) return;
 
             Unit unit = this.get(0);
@@ -269,19 +240,15 @@ public class Aggrobot extends AbstractionLayerAI{
             List<Integer> reservedPositions = new LinkedList<>();
 
             int xStride = 0;
-            while(xStride < xAllowed)
-            {
+            while(xStride < xAllowed) {
                 int potentialX = x + xStride*xAlternate;
                 if(potentialX < gs.getPhysicalGameState().getWidth() && potentialX >= 0) { 
                     int yStride = 0;
-                    while(yStride < yAllowed)
-                    {
+                    while(yStride < yAllowed) {
                         int potentialY = y + yStride*yAlternate;
                         if (potentialY < gs.getPhysicalGameState().getHeight() && potentialY >= 0 &&
-                            isGridFree[potentialX][potentialY])
-                        {
-                            if(closestEnemy != null)
-                            {
+                            isGridFree[potentialX][potentialY]) {
+                            if(closestEnemy != null) {
                                 int potentialDist = manhattanDist(potentialX, potentialY, closestEnemy.getX(),
                                         closestEnemy.getY());
                                 if (potentialDist < prevDistanceToEnemy) {
@@ -293,8 +260,7 @@ public class Aggrobot extends AbstractionLayerAI{
                                     selectedPos.y = potentialY;
                                     prevDistanceToEnemy = potentialDist;
                                 }
-                            }
-                            else {
+                            } else {
                                 // If no enemy then we are done
                                 return;
                             }
@@ -326,31 +292,26 @@ public class Aggrobot extends AbstractionLayerAI{
 
         public List<Unit> getUnits() { return units; }
 
-        public UnitDesc getClosestEnemy(PhysicalGameState physicalGS, Player player)
-        {
+        public UnitDesc getClosestEnemy(PhysicalGameState physicalGS, Player player) {
             Unit leader = this.units.get(0);
 
             return Aggrobot.this.getUniClosestEnemy(leader, physicalGS, player);
         }
 
-        public UnitDesc getClosestFightingAlly(PhysicalGameState physicalGS, Player player)
-        {
+        public UnitDesc getClosestFightingAlly(PhysicalGameState physicalGS, Player player) {
             UnitDesc unitDesc = new UnitDesc();
 
             Unit leader = this.units.get(0);
 
-            for(Unit unit : physicalGS.getUnits())
-            {
+            for(Unit unit : physicalGS.getUnits()) {
                 if(unit.getPlayer() >= 0 && unit.getPlayer() == player.getID() &&
-                   !(this.units.contains(leader)) && unit.getType().canAttack)
-                {
+                   !(this.units.contains(leader)) && unit.getType().canAttack) {
                     int unitDistX = Math.abs(leader.getX() - unit.getX());
                     int unitDistY = Math.abs(leader.getY() - unit.getY());
 
                     int dist = unitDistX + unitDistY;
 
-                    if(unitDesc.unit == null || dist < (unitDesc.distVec.x + unitDesc.distVec.y))
-                    {
+                    if(unitDesc.unit == null || dist < (unitDesc.distVec.x + unitDesc.distVec.y)) {
                         unitDesc.distVec.x = unitDistX;
                         unitDesc.distVec.y = unitDistY;
                         unitDesc.unit = unit;
@@ -361,23 +322,17 @@ public class Aggrobot extends AbstractionLayerAI{
             return unitDesc;
         }
 
-        public boolean withinVicinity(Unit unit, int margin)
-        {
+        public boolean withinVicinity(Unit unit, int margin) {
             Vector2D centroid = getCentroid();
 
             int dist = (int)(Math.abs(centroid.x - unit.getX()) + Math.abs(centroid.y - unit.getY()));
 
-            if(dist <= margin)
-            {
-                return true;
-            }
+            if(dist <= margin) return true;
             else return false;
         }
 
-        public void updateMembers(GameState gs, Player player, List<Unit> workers, int numberNeeded)
-        {
-            for(int idx = 0; idx < units.size(); idx++)
-            {
+        public void updateMembers(GameState gs, Player player, List<Unit> workers, int numberNeeded) {
+            for(int idx = 0; idx < units.size(); idx++) {
                 Unit unit = units.get(idx);
                 if (unit.getHitPoints() == 0) {
                     units.remove(unit);
@@ -434,13 +389,9 @@ public class Aggrobot extends AbstractionLayerAI{
     boolean canInitStrategize;
     boolean initialWaitForEnemy;
 
-    public Aggrobot(UnitTypeTable utt)
-    {
-        this(utt, new AStarPathFinding());
-    }
+    public Aggrobot(UnitTypeTable utt) { this(utt, new AStarPathFinding()); }
 
-    public Aggrobot(UnitTypeTable utt, PathFinding pf)
-    {
+    public Aggrobot(UnitTypeTable utt, PathFinding pf) {
         super(pf);
         reset(utt);
     }
@@ -493,15 +444,13 @@ public class Aggrobot extends AbstractionLayerAI{
         Unit initialBase = null;
 
         List<Unit> workers = new ArrayList<>();
-        for (Unit unit : physicalGS.getUnits())
-        {
+        for (Unit unit : physicalGS.getUnits()) {
             if(unit.getPlayer() == player.getID()) {
                 // Player units
                 if(unit.getType() == workerType) {
                     workers.add(unit);
                     numAllyWorkers++;
-                }
-                else if(unit.getType() == lightType)    ++numAllyLight;
+                } else if(unit.getType() == lightType)    ++numAllyLight;
                 else if(unit.getType() == heavyType)    ++numAllyHeavy;
                 else if(unit.getType() == rangedType)   ++numAllyRanged;
                 else if(unit.getType() == baseType) {
@@ -511,9 +460,8 @@ public class Aggrobot extends AbstractionLayerAI{
                     ++numAllyBases;
                 }
                 else if(unit.getType() == barracksType) ++numAllyBarracks;
-            }
-            else if (unit.getPlayer() < 0) {}
-            else {
+            } else if (unit.getPlayer() < 0) {
+            } else {
                 // Enemy units
                 if(unit.getType() == workerType)      ++numEnemyWorkers;
                 else if(unit.getType() == lightType)  ++numEnemyLight;
@@ -540,8 +488,7 @@ public class Aggrobot extends AbstractionLayerAI{
         */
 
         // On game Init
-        if(gameState.getTime() == 0)
-        {
+        if(gameState.getTime() == 0) {
             initialWaitForEnemy = true;
             Unit candidateUnit = null;
             Unit initialEnemy = null;
@@ -549,23 +496,18 @@ public class Aggrobot extends AbstractionLayerAI{
             UnitType priorityEnemyType = workerType;
             int enemyDist = physicalGS.getHeight() + physicalGS.getWidth();
             for(Unit unit : physicalGS.getUnits()) {
-                if(unit.getPlayer() >= 0  && unit.getPlayer() == player.getID())
-                {
+                if(unit.getPlayer() >= 0  && unit.getPlayer() == player.getID()) {
                     candidateUnit = unit;
-                    if(unit.getType().canAttack)
-                    {
+                    if(unit.getType().canAttack) {
                         for(Unit unit2 : physicalGS.getUnits()) {
-                            if(unit2.getPlayer() >= 0 && unit2.getPlayer() != player.getID())
-                            {
+                            if(unit2.getPlayer() >= 0 && unit2.getPlayer() != player.getID()) {
                                 initialEnemy = unit2;
-                                if(unit2.getType().canAttack)
-                                {
+                                if(unit2.getType().canAttack) {
                                     int tempDist = manhattanDist(unit.getX(), unit.getY(), unit2.getX(), unit2.getY());
                                     if(tempDist < enemyDist) {
                                         enemyDist = tempDist;
                                     }
-                                    if(unit2.getType() == lightType)
-                                    {
+                                    if(unit2.getType() == lightType) {
                                         priorityEnemyType = lightType;
                                     }
                                 }
@@ -578,15 +520,11 @@ public class Aggrobot extends AbstractionLayerAI{
             int closestDistance = 0;
             Unit closestRes = null;
 
-            if(candidateUnit != null)
-            {
-                for (Unit unit : physicalGS.getUnits())
-                {
-                    if(unit.getPlayer() < 0 && unit.getType().isResource)
-                    {
+            if(candidateUnit != null) {
+                for (Unit unit : physicalGS.getUnits()) {
+                    if(unit.getPlayer() < 0 && unit.getType().isResource) {
                         int manhDist = manhattanDist(candidateUnit.getX(), candidateUnit.getY(), unit.getX(), unit.getY());
-                        if(closestRes == null || closestDistance > manhDist)
-                        {
+                        if(closestRes == null || closestDistance > manhDist) {
                             closestDistance = manhDist;
                             closestRes = unit;
                         }
@@ -600,10 +538,8 @@ public class Aggrobot extends AbstractionLayerAI{
 
             // Time needed for the light units to move some steps in case we do not have enough resources
             int paddingTime  = lightType.moveTime*2;
-            if(player.getResources() < barracksType.cost+lightType.cost)
-            {
-                if(numAllyWorkers > 0)
-                {
+            if(player.getResources() < barracksType.cost+lightType.cost) {
+                if(numAllyWorkers > 0) {
                     Unit leader = workers.get(0);
 
                     int closestResDist = 0;
@@ -620,8 +556,7 @@ public class Aggrobot extends AbstractionLayerAI{
                     }
 
                     paddingTime = closestResDist*workerType.moveTime*2*(barracksType.cost+lightType.cost+1 - player.getResources());
-                }
-                else { paddingTime += baseType.cost + 2*workerType.cost; }
+                } else { paddingTime += baseType.cost + 2*workerType.cost; }
             }
 
             // If enemy will reach us before we can prepare, then we swarm them initially.
@@ -630,10 +565,8 @@ public class Aggrobot extends AbstractionLayerAI{
                 // Do we have time to make a second home cluster member
                 if (workerType.produceTime*4 < enemyDist*priorityEnemyType.moveTime) {
                     maxNumHome = 2;
-                }
-                else maxNumHome = 1;
-            }
-            else {
+                } else maxNumHome = 1;
+            } else {
                 // In case we are strategizing, it is always better to have 2 home cluster member
                 canInitStrategize = true;
                 maxNumHome = 2;
@@ -644,20 +577,16 @@ public class Aggrobot extends AbstractionLayerAI{
             // Code to wait for another unit to come and then go with it.
             int timeToGatherRes = (player.getResources() >= lightType.cost) ? lightType.cost : lightType.cost+workerType.moveTime*6; // 6 is magic number here
             int dLight = (enemyDist*priorityEnemyType.moveTime - timeToBuildLightUnit - paddingTime - timeToGatherRes) / (4*lightType.moveTime);
-            if(initialBase != null && initialEnemy != null) 
-            {
+            if(initialBase != null && initialEnemy != null) {
                 idlePosition = initialBase.getX() + initialBase.getY() + dLight;
-                if(initialBase.getX() + initialBase.getY() > initialEnemy.getX() + initialEnemy.getY())
-                {
+                if(initialBase.getX() + initialBase.getY() > initialEnemy.getX() + initialEnemy.getY()) {
                     idlePosition = (initialBase.getX()) - (physicalGS.getHeight() - initialBase.getY()) - dLight;
                 }
-            }
-            else idlePosition = Math.min(physicalGS.getHeight(), physicalGS.getWidth())/4;
+            } else idlePosition = Math.min(physicalGS.getHeight(), physicalGS.getWidth())/4;
         }
 
         // See if we can strategize now, then let's do that
-        if(canInitStrategize == false && gameState.getTime() > workerType.produceTime*2)
-        {
+        if(canInitStrategize == false && gameState.getTime() > workerType.produceTime*2) {
             // System.out.println("Cluster: " + pawnCluster.size());
             if (pawnCluster.size() >= (numEnemyWorkers + numEnemyHeavy + numEnemyRanged + numEnemyLight) &&
                 player.getResources() >= lightType.cost*1.5 && homeCluster.size() > 1) {
@@ -665,22 +594,18 @@ public class Aggrobot extends AbstractionLayerAI{
                 initialWaitForEnemy = false;
             }
             // If we got of these by any change then we can go strategizing again
-            else if (numAllyHeavy + numAllyLight >= 2)
-            {
+            else if (numAllyHeavy + numAllyLight >= 2) {
                 canInitStrategize = true;
                 initialWaitForEnemy = false;
             }
         }
 
         // Update the members
-        if(canInitStrategize)
-        {
+        if(canInitStrategize) {
             homeCluster.updateMembers(gameState, player, workers, maxNumHome);
             pawnCluster.units.clear();
             pawnCluster.updateMembers(gameState, player, workers, maxNumPawn);
-        }
-        else
-        {
+        } else {
             int maxLen = Math.max(physicalGS.getHeight(), physicalGS.getWidth());
             // homeCluster.updateMembers(gameState, player, workers, ((gameState.getTime() > workerType.moveTime*3*maxLen/4 ? 2 : 1)));
             homeCluster.updateMembers(gameState, player, workers, maxNumHome);
@@ -713,23 +638,19 @@ public class Aggrobot extends AbstractionLayerAI{
         return translateActions(p, gameState);
     }
 
-    public void basesUpdate(GameState gameState, Player player, boolean canStrategize)
-    {
+    public void basesUpdate(GameState gameState, Player player, boolean canStrategize) {
         PhysicalGameState physicalGS = gameState.getPhysicalGameState();
 
-        for (Unit unit : physicalGS.getUnits())
-        {
+        for (Unit unit : physicalGS.getUnits()) {
             if(unit.getType() == baseType &&
                unit.getPlayer() == player.getID() &&
-               gameState.getActionAssignment(unit) == null)
-            {
+               gameState.getActionAssignment(unit) == null) {
                 if(numAllyWorkers == 0 && player.getResources() >= workerType.cost) {
                     train(unit, workerType);
                     return;
                 }
                 // If we are strategizing, then only make your home cluster and be done with it.
-                if(canStrategize)
-                {
+                if(canStrategize) {
                     // We will not create the second home worker until we have a light unit, in case of strategy
                     if(homeCluster.size() > 0 && numAllyLight == 0) return;
                     if(homeCluster.size() < maxNumHome && player.getResources() >= workerType.cost) {
@@ -747,22 +668,19 @@ public class Aggrobot extends AbstractionLayerAI{
         }
     }
 
-    class UnitTypeWithCount
-    {
+    class UnitTypeWithCount {
         UnitType unitType = null;
         int maxCount = 0;
         int currentCount = 0;
 
-        public UnitTypeWithCount(UnitType unitType, int maxCount, int currentCount)
-        {
+        public UnitTypeWithCount(UnitType unitType, int maxCount, int currentCount) {
             this.unitType = unitType;
             this.maxCount = maxCount;
             this.currentCount = currentCount;
         }
     }
 
-    public void barracksUpdate(GameState gameState, Player player, boolean isAllowedToTrain)
-    {
+    public void barracksUpdate(GameState gameState, Player player, boolean isAllowedToTrain) {
         PhysicalGameState physicalGS = gameState.getPhysicalGameState();
 
         List<UnitTypeWithCount> priorityList = new ArrayList<>();
@@ -773,8 +691,7 @@ public class Aggrobot extends AbstractionLayerAI{
         for (Unit unit : physicalGS.getUnits()) {
             if (unit.getType() == barracksType &&
                 unit.getPlayer() == player.getID() &&
-                gameState.getActionAssignment(unit) == null)
-            {
+                gameState.getActionAssignment(unit) == null) {
                 for(int idx = 0; idx <priorityList.size(); idx++) {
                     UnitTypeWithCount unitTypeWithCount = priorityList.get(idx);
                     if(unitTypeWithCount.currentCount < unitTypeWithCount.maxCount) {
@@ -786,12 +703,10 @@ public class Aggrobot extends AbstractionLayerAI{
         }
     }
 
-    public void pawnClusterUpdate(GameState gameState, Player player)
-    {
+    public void pawnClusterUpdate(GameState gameState, Player player) {
         PhysicalGameState physicalGS = gameState.getPhysicalGameState();
 
-        if(pawnCluster.size() > 0)
-        {
+        if(pawnCluster.size() > 0) {
             // Keep moving if we are in safe zone, hoever, start attacking the moment the enemy reaches
             // half-way through.
             // Once we have, light and ranged units, attack!
@@ -804,8 +719,7 @@ public class Aggrobot extends AbstractionLayerAI{
         }
     }
 
-    public void homeClusterUpdate(GameState gameState, Player player, boolean canStrategize)
-    {
+    public void homeClusterUpdate(GameState gameState, Player player, boolean canStrategize) {
         PhysicalGameState physicalGS = gameState.getPhysicalGameState();
 
         if(homeCluster.size() > 0)
@@ -833,24 +747,18 @@ public class Aggrobot extends AbstractionLayerAI{
             Unit closestStockUnit = null;
 
             Unit leader = homeCluster.get(0);
-            for (Unit unit : physicalGS.getUnits())
-            {
-                if (unit.getType().isResource)
-                {
+            for (Unit unit : physicalGS.getUnits()) {
+                if (unit.getType().isResource) {
                     int dist =  Math.abs(leader.getX() - unit.getX()) +
                                 Math.abs(leader.getY() - unit.getY());
-                    if(closestResUnit == null || dist < closestResDist)
-                    {
+                    if(closestResUnit == null || dist < closestResDist) {
                         closestResDist = dist;
                         closestResUnit = unit;
                     }
-                }
-                else if(unit.getType().isStockpile && unit.getPlayer() == player.getID())
-                {
+                } else if(unit.getType().isStockpile && unit.getPlayer() == player.getID()) {
                     int dist =  Math.abs(leader.getX() - unit.getX()) +
                                 Math.abs(leader.getY() - unit.getY());
-                    if(closestStockUnit == null || dist < closestStockDist)
-                    {
+                    if(closestStockUnit == null || dist < closestStockDist) {
                         closestStockDist = dist;
                         closestStockUnit = unit;
                     }
@@ -864,13 +772,11 @@ public class Aggrobot extends AbstractionLayerAI{
             if(closestEnemy.distVec.x + closestEnemy.distVec.y < closestAlly.distVec.x + closestAlly.distVec.y) {
                 if(closestAlly.unit.getType() == workerType) {
                     // NOTE(Abid): Then we have pawn cluster around
-                    for (Unit unit : pawnCluster.units)
-                    {
+                    for (Unit unit : pawnCluster.units) {
                         // if(gameState.getActionAssignment(unit) == null)
                         attack(unit, closestEnemy.unit);
                     }
-                }
-                else {
+                } else {
                     // NOTE(Abid): Singular units
                     attack(closestAlly.unit, closestEnemy.unit);
                 }
@@ -897,37 +803,31 @@ public class Aggrobot extends AbstractionLayerAI{
                            // closestEnemyDist*((numEnemyLight == 0) ? workerType.moveTime : lightType.moveTime) > barracksType.produceTime)
                         {
                             buildUnitInVicinity(unit, gameState, player, barracksType);
-                        }
-                        else if (gameState.getActionAssignment(unit) == null) {
+                        } else if (gameState.getActionAssignment(unit) == null) {
                             harvest(unit, closestResUnit, closestStockUnit);
                         }
                     }
                 }
-            }
-            else if(closestResUnit == null)
-            {
+            } else if(closestResUnit == null) {
                 if(pawnCluster.size() == 0) {
                     for (Unit unit : homeCluster.units) {
                         UnitDesc closestLocalEnemy = getUniClosestEnemy(unit, physicalGS, player);
                         attack(unit, closestLocalEnemy.unit);
                     }
                 }
-            }
-            else if(closestStockUnit == null) {
+            } else if(closestStockUnit == null) {
                 homeCluster.buildInVicinity(gameState, player, baseType);
             }
         }
     }
     
-    public void updateLightUnits(GameState gameState, Player player, int idleDest, int attackDistance)
-    {
+    public void updateLightUnits(GameState gameState, Player player, int idleDest, int attackDistance) {
         PhysicalGameState physicalGS = gameState.getPhysicalGameState();
 
         for (Unit unit : physicalGS.getUnits()) {
             if(unit.getType() == lightType &&
                unit.getPlayer() == player.getID() &&
-               gameState.getActionAssignment(unit) == null)
-            {
+               gameState.getActionAssignment(unit) == null) {
                 // if(pawnCluster.size() > 0)
                 // {
                 //     if(pawnCluster.action.equals("move"))
@@ -948,12 +848,10 @@ public class Aggrobot extends AbstractionLayerAI{
                 //     }
                 // }
                 UnitDesc closestEnemy = getUniClosestEnemy(unit, physicalGS, player);
-                if(initialWaitForEnemy && closestEnemy.distVec.x + closestEnemy.distVec.y > attackDistance)
-                {
+                if(initialWaitForEnemy && closestEnemy.distVec.x + closestEnemy.distVec.y > attackDistance) {
                     Vector2D avilPos = getAvailPosInVicinity(gameState, player, idleDest, idleDest);
                     move(unit, (int)avilPos.x, (int)avilPos.y);
-                }
-                else {
+                } else {
                     attack(unit, closestEnemy.unit);
                     initialWaitForEnemy = false;
                 }
@@ -962,15 +860,12 @@ public class Aggrobot extends AbstractionLayerAI{
 
     }
 
-    public void updateRangedUnits(GameState gameState, Player player)
-    {
+    public void updateRangedUnits(GameState gameState, Player player) {
         PhysicalGameState physicalGS = gameState.getPhysicalGameState();
-        for (Unit unit : physicalGS.getUnits())
-        {
+        for (Unit unit : physicalGS.getUnits()) {
             if(unit.getType() == rangedType &&
                unit.getPlayer() == player.getID() &&
-               gameState.getActionAssignment(unit) == null)
-            {
+               gameState.getActionAssignment(unit) == null) {
                 // if(pawnCluster.size() > 0)
                 // {
                 //     if(pawnCluster.action.equals("move"))
@@ -999,17 +894,14 @@ public class Aggrobot extends AbstractionLayerAI{
         }
     }
 
-    public void updateHeavyUnits(GameState gameState, Player player)
-    {
+    public void updateHeavyUnits(GameState gameState, Player player) {
         PhysicalGameState physicalGS = gameState.getPhysicalGameState();
 
         // Heavy
-        for (Unit unit : physicalGS.getUnits())
-        {
+        for (Unit unit : physicalGS.getUnits()) {
             if(unit.getType() == heavyType &&
                unit.getPlayer() == player.getID() &&
-               gameState.getActionAssignment(unit) == null)
-            {
+               gameState.getActionAssignment(unit) == null) {
                 // Make workers if conditions allow
                 // if(pawnCluster.size() > 0)
                 // {
@@ -1040,13 +932,11 @@ public class Aggrobot extends AbstractionLayerAI{
     }
 
 
-    public int manhattanDist(int unit1X, int unit1Y, int unit2X, int unit2Y)
-    {
+    public int manhattanDist(int unit1X, int unit1Y, int unit2X, int unit2Y) {
         return (int)(Math.abs(unit1X - unit2X) + Math.abs(unit1Y - unit2Y));
     }
 
-    public void buildUnitInVicinity(Unit unit, GameState gs, Player p, UnitType unitType)
-    {
+    public void buildUnitInVicinity(Unit unit, GameState gs, Player p, UnitType unitType) {
         // for (Unit unit2 : units)
         // {
         //     if(gs.getActionAssignment(unit2) == null) { unit = unit2; }
@@ -1070,17 +960,14 @@ public class Aggrobot extends AbstractionLayerAI{
         int xAlternate = 1;
         int yAlternate = 1;
         List<Integer> reservedPositions = new LinkedList<>();
-        for (int xStride = 2; xStride < xAllowed; xStride += 2)
-        {
-            for (int yStride = 1; yStride < yAllowed; yStride++)
-            {
+        for (int xStride = 2; xStride < xAllowed; xStride += 2) {
+            for (int yStride = 1; yStride < yAllowed; yStride++) {
                 int potentialX = x + xStride*xAlternate;
                 int potentialY = y + yStride*yAlternate;
                 if(potentialX >= gs.getPhysicalGameState().getWidth() || potentialX < 0) { continue; }
                 if(potentialY >= gs.getPhysicalGameState().getHeight() || potentialY < 0) { continue; }
 
-                if (isGridFree[potentialX][potentialY])
-                {
+                if (isGridFree[potentialX][potentialY]) {
                     // build(unit, unitType, potentialX, potentialY);
                     buildIfNotAlreadyBuilding(unit, unitType, potentialX, potentialY,reservedPositions,p,gs.getPhysicalGameState());
                     return;
@@ -1091,8 +978,7 @@ public class Aggrobot extends AbstractionLayerAI{
         }
     }
 
-    protected Vector2D getAvailPosInVicinity(GameState gs, Player p, int x, int y)
-    {
+    protected Vector2D getAvailPosInVicinity(GameState gs, Player p, int x, int y) {
         boolean[][] isGridFree = gs.getAllFree();
 
         int xAllowed = 0;
@@ -1109,17 +995,14 @@ public class Aggrobot extends AbstractionLayerAI{
         Vector2D selectedPos = new Vector2D(-1, -1);;
 
         int xStride = 0;
-        while(xStride < xAllowed)
-        {
+        while(xStride < xAllowed) {
             int potentialX = x + xStride*xAlternate;
             if(potentialX < gs.getPhysicalGameState().getWidth() && potentialX >= 0) { 
                 int yStride = 0;
-                while(yStride < yAllowed)
-                {
+                while(yStride < yAllowed) {
                     int potentialY = y + yStride*yAlternate;
                     if (potentialY < gs.getPhysicalGameState().getHeight() && potentialY >= 0 &&
-                        isGridFree[potentialX][potentialY])
-                    {
+                        isGridFree[potentialX][potentialY]) {
                         selectedPos.x = potentialX; selectedPos.y = potentialY;
                         return selectedPos;
                     }
